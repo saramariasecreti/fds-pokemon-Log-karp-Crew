@@ -23,6 +23,12 @@ A pruning process, involving correlation removal and GridSearch-optimized Select
 3)Models
 --->Base Learners: A Logistic Regression model (optimized via GridSearch for L1/L2/ElasticNet penalties) and an XGBoost Classifier (optimized via GridSearch for hyperparameters like n_estimators and max_depth).
 
+Stacked Ensemble (Final)	0.8493
+
 --->Final Predictor: A Stacking Classifier was implemented, using the optimized Logistic Regression model as the meta-learner to combine the predictions of the two base models.
 
 --->Validation: Hyperparameter tuning and model evaluation employed a 5-fold Stratified K-Fold cross-validation strategy. The primary scoring metric used throughout the tuning process was Accuracy.
+
+# Results
+
+
