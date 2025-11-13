@@ -20,7 +20,7 @@ A total of 184 domain-specific features were engineered from the raw timeline da
 2) Feature Selection
 A pruning process, involving correlation removal and GridSearch-optimized SelectFromModel (using Logistic Regression's coefficients and XGBoost's feature importance), reduced the final feature set.
 
-3)Models
+3) Models
 --->Base Learners: A Logistic Regression model (optimized via GridSearch for L1/L2/ElasticNet penalties) and an XGBoost Classifier (optimized via GridSearch for hyperparameters like n_estimators and max_depth).
 
 Stacked Ensemble (Final)	0.8493
