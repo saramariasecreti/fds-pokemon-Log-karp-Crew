@@ -9,10 +9,10 @@ from pathlib import Path
 # ==============================================================================
 # DATA CONFIGURATION
 # ==============================================================================
-
+COMPETITION_NAME = 'fds-pokemon-battles-prediction-2025'
 COL_ID = "battle_id"
 COL_TARGET = "player_won"
-DATA_PATH = Path.cwd()
+DATA_PATH = os.path.join('/kaggle/input', COMPETITION_NAME)
 SEED = 1234
 
 # ==============================================================================
