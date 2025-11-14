@@ -55,7 +55,7 @@ def load_data():
 
     return train_df, test_df
 
-train_df, test_df = load_data(
+train_df, test_df = load_data()
 
 
 # ==============================================================================
