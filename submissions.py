@@ -34,16 +34,14 @@ def create_submissions(
         COL_TARGET: (test_pred_stack >= threshold).astype(int)
     })
     submission_meta.to_csv("submissionMETA.csv", index=False)
-    print(f"\nSubmission saved: submissionMETA.csv")
-    print(f"  Shape: {submission_meta.shape}")
+    print(f"\nSubmission saved: submissionfinal.csv")
+    print(f"  Shape: {submissionfinal.shape}")
 
-    # OFFICIAL COMPETITION SUBMISSION (here: META model)
-    submission_meta.to_csv("submission.csv", index=False)
-    print("\nOfficial competition file saved as: submission.csv")
+ 
 
     return {
         "log": submission_log,
         "weighted": submission_w,
-        "meta": submission_meta
+        "meta": submissionfinal
     }
 
