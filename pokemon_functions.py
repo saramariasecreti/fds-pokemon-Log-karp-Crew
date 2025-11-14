@@ -6,7 +6,7 @@ Functions for extracting features from battle timelines.
 
 import numpy as np
 import pandas as pd
-from constants import *
+from pokemon_constants import *
 
 
 # ==============================================================================
