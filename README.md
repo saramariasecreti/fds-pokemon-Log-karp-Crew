@@ -78,7 +78,6 @@ Multiplicative interactions capturing non-linear relationships:
 - Boost × Survivors (setup sweeper success)
 - Damage × Control (status synergies)
 
-##  Model Performance
 ## Ensemble Methods
 
 The pipeline implements **three ensemble strategies**:
