@@ -16,8 +16,8 @@ This project analyzes Pokemon battle timelines from the first turns to predict m
 
 ## 📊 Feature Categories
 
-| Category | Count | Description |
-|----------|-------|-------------|
+| Category | Count | 
+|----------|-------|
 | Status Features | Timing, targets, and momentum of status conditions |
 | Endgame Features | KOs, survivors, active field effects at T30 |
 | Role Features | Survivor role composition (walls, breakers, spreaders) |
