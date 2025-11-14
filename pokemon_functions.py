@@ -785,192 +785,6 @@ def make_role_features(row):
     return pd.Series(features, dtype="float64")
 
 
-# ==============================================================================
-# DAMAGE TRACKING FEATURES
-# ==============================================================================
-
-def _count_kos_dealt(row, side):
-    """Helper: Count KOs dealt by a side."""
-    timeline = row.get("battle_timeline", []) or []
-    opponent_side = 'p2' if side == 'p1' else 'p1'
-    
-    fainted = set()
-    for t in timeline[:30]:
-        state = t.get(f"{opponent_side}_pokemon_state", {}) or {}
-        if state.get("hp_pct", 1.0) == 0:
-            name = (state.get("name") or "").lower()
-            if name:
-                fainted.add(name)
-    
-    return len(fainted)
-
-
-def _extract_damage_features(row):
-    """Extract comprehensive damage-related features."""
-    timeline = row.get("battle_timeline", []) or []
-    if not timeline:
-        return {
-            'p1_total_damage_dealt': 0, 'p2_total_damage_dealt': 0,
-            'p1_avg_damage_per_turn': 0, 'p2_avg_damage_per_turn': 0,
-            'p1_damage_variance': 0, 'p2_damage_variance': 0,
-            'p1_ko_efficiency': 0, 'p2_ko_efficiency': 0,
-            'p1_early_damage_rate': 0, 'p2_early_damage_rate': 0,
-            'p1_late_damage_rate': 0, 'p2_late_damage_rate': 0,
-            'p1_max_single_hit': 0, 'p2_max_single_hit': 0,
-            'p1_ohko_count': 0, 'p2_ohko_count': 0
-        }
-    
-    # Track HP changes to measure damage
-    p1_damage_dealt = []
-    p2_damage_dealt = []
-    
-    p1_early_damage = []
-    p2_early_damage = []
-    p1_late_damage = []
-    p2_late_damage = []
-    
-    p1_ohko = 0
-    p2_ohko = 0
-    
-    # Track previous HP to calculate damage
-    prev_p1_hp = None
-    prev_p2_hp = None
-    prev_p1_pokemon = None
-    prev_p2_pokemon = None
-    
-    for t in timeline[:30]:
-        turn = int(t.get("turn", 0))
-        
-        p1_state = t.get("p1_pokemon_state", {}) or {}
-        p2_state = t.get("p2_pokemon_state", {}) or {}
-        
-        p1_hp = p1_state.get("hp_pct", 1.0)
-        p2_hp = p2_state.get("hp_pct", 1.0)
-        
-        p1_name = (p1_state.get("name") or "").lower()
-        p2_name = (p2_state.get("name") or "").lower()
-        
-        # Calculate damage only if same pokemon (no switch)
-        if prev_p1_hp is not None and prev_p1_pokemon == p1_name and p1_name:
-            damage_to_p1 = max(0, prev_p1_hp - p1_hp)
-            if damage_to_p1 > 0:
-                p2_damage_dealt.append(damage_to_p1)
-                
-                if prev_p1_hp > 0.9 and p1_hp == 0:
-                    p2_ohko += 1
-                
-                if turn <= 10:
-                    p2_early_damage.append(damage_to_p1)
-                elif turn >= 20:
-                    p2_late_damage.append(damage_to_p1)
-        
-        if prev_p2_hp is not None and prev_p2_pokemon == p2_name and p2_name:
-            damage_to_p2 = max(0, prev_p2_hp - p2_hp)
-            if damage_to_p2 > 0:
-                p1_damage_dealt.append(damage_to_p2)
-                
-                if prev_p2_hp > 0.9 and p2_hp == 0:
-                    p1_ohko += 1
-                
-                if turn <= 10:
-                    p1_early_damage.append(damage_to_p2)
-                elif turn >= 20:
-                    p1_late_damage.append(damage_to_p2)
-        
-        prev_p1_hp = p1_hp
-        prev_p2_hp = p2_hp
-        prev_p1_pokemon = p1_name
-        prev_p2_pokemon = p2_name
-    
-    # Aggregate metrics
-    p1_total = sum(p1_damage_dealt)
-    p2_total = sum(p2_damage_dealt)
-    
-    p1_avg = np.mean(p1_damage_dealt) if p1_damage_dealt else 0
-    p2_avg = np.mean(p2_damage_dealt) if p2_damage_dealt else 0
-    
-    p1_var = np.var(p1_damage_dealt) if len(p1_damage_dealt) > 1 else 0
-    p2_var = np.var(p2_damage_dealt) if len(p2_damage_dealt) > 1 else 0
-    
-    # KO efficiency
-    p1_kos = max(1, _count_kos_dealt(row, 'p1'))
-    p2_kos = max(1, _count_kos_dealt(row, 'p2'))
-    
-    p1_efficiency = p1_total / p1_kos
-    p2_efficiency = p2_total / p2_kos
-    
-    # Early/late damage rates
-    p1_early_rate = np.mean(p1_early_damage) if p1_early_damage else 0
-    p2_early_rate = np.mean(p2_early_damage) if p2_early_damage else 0
-    p1_late_rate = np.mean(p1_late_damage) if p1_late_damage else 0
-    p2_late_rate = np.mean(p2_late_damage) if p2_late_damage else 0
-    
-    # Max single hit
-    p1_max_hit = max(p1_damage_dealt) if p1_damage_dealt else 0
-    p2_max_hit = max(p2_damage_dealt) if p2_damage_dealt else 0
-    
-    return {
-        'p1_total_damage_dealt': p1_total,
-        'p2_total_damage_dealt': p2_total,
-        'p1_avg_damage_per_turn': p1_avg,
-        'p2_avg_damage_per_turn': p2_avg,
-        'p1_damage_variance': p1_var,
-        'p2_damage_variance': p2_var,
-        'p1_ko_efficiency': p1_efficiency,
-        'p2_ko_efficiency': p2_efficiency,
-        'p1_early_damage_rate': p1_early_rate,
-        'p2_early_damage_rate': p2_early_rate,
-        'p1_late_damage_rate': p1_late_rate,
-        'p2_late_damage_rate': p2_late_rate,
-        'p1_max_single_hit': p1_max_hit,
-        'p2_max_single_hit': p2_max_hit,
-        'p1_ohko_count': p1_ohko,
-        'p2_ohko_count': p2_ohko
-    }
-
-
-def make_damage_features(row):
-    """Create damage features with differentials."""
-    stats = _extract_damage_features(row)
-    
-    return pd.Series({
-        'p1_total_damage_dealt': stats['p1_total_damage_dealt'],
-        'p2_total_damage_dealt': stats['p2_total_damage_dealt'],
-        'total_damage_diff': stats['p1_total_damage_dealt'] - stats['p2_total_damage_dealt'],
-        
-        'p1_avg_damage_per_turn': stats['p1_avg_damage_per_turn'],
-        'p2_avg_damage_per_turn': stats['p2_avg_damage_per_turn'],
-        'avg_damage_diff': stats['p1_avg_damage_per_turn'] - stats['p2_avg_damage_per_turn'],
-        
-        'p1_damage_variance': stats['p1_damage_variance'],
-        'p2_damage_variance': stats['p2_damage_variance'],
-        'damage_variance_diff': stats['p1_damage_variance'] - stats['p2_damage_variance'],
-        
-        'p1_ko_efficiency': stats['p1_ko_efficiency'],
-        'p2_ko_efficiency': stats['p2_ko_efficiency'],
-        'ko_efficiency_diff': stats['p1_ko_efficiency'] - stats['p2_ko_efficiency'],
-        
-        'p1_early_damage_rate': stats['p1_early_damage_rate'],
-        'p2_early_damage_rate': stats['p2_early_damage_rate'],
-        'early_damage_diff': stats['p1_early_damage_rate'] - stats['p2_early_damage_rate'],
-        
-        'p1_late_damage_rate': stats['p1_late_damage_rate'],
-        'p2_late_damage_rate': stats['p2_late_damage_rate'],
-        'late_damage_diff': stats['p1_late_damage_rate'] - stats['p2_late_damage_rate'],
-        
-        'p1_max_single_hit': stats['p1_max_single_hit'],
-        'p2_max_single_hit': stats['p2_max_single_hit'],
-        'max_hit_diff': stats['p1_max_single_hit'] - stats['p2_max_single_hit'],
-        
-        'p1_ohko_count': stats['p1_ohko_count'],
-        'p2_ohko_count': stats['p2_ohko_count'],
-        'ohko_diff': stats['p1_ohko_count'] - stats['p2_ohko_count'],
-        
-        'p1_damage_consistency': stats['p1_avg_damage_per_turn'] / (stats['p1_damage_variance'] + 0.01),
-        'p2_damage_consistency': stats['p2_avg_damage_per_turn'] / (stats['p2_damage_variance'] + 0.01),
-        'damage_consistency_diff': (stats['p1_avg_damage_per_turn'] / (stats['p1_damage_variance'] + 0.01)) - 
-                                   (stats['p2_avg_damage_per_turn'] / (stats['p2_damage_variance'] + 0.01))
-    }, dtype="float64")
 
 
 # ==============================================================================
@@ -1402,10 +1216,7 @@ def make_interaction_features(row):
     # TEAM COMP × EXECUTION
     out['team_value_x_errors'] = g('team_value_diff', 0) * (-g('errors_diff', 0))
     out['speed_control_x_momentum'] = g('speed_control_diff', 0) * g('hp_momentum_diff', 0)
-    
-    # WALLS UNDER PRESSURE
-    out['walls_x_status'] = g('walls_diff', 0) * g('statused_alive_end_diff', 0)
-    out['walls_x_hp'] = g('walls_diff', 0) * g('avg_hp_alive_diff', 0)
+
     
     # STATUS AND EFFECTS
     out['ko_status_interaction'] = g('ko_diff_30', 0) * g('status_diff_highvalue', 0)
@@ -1427,15 +1238,7 @@ def make_interaction_features(row):
     out['control_closure_link'] = (g('survivor_diff_30', 0) * g('turns_disabled_diff', 0)) * g('ko_diff_30', 0)
     out['opp_hp_under_status'] = g('p2_avg_hp_alive', 0) * g('p2_statused_alive_end', 0)
     
-    # DAMAGE INTERACTIONS
-    out['damage_x_ko'] = g('total_damage_diff', 0) * g('ko_diff_30', 0)
-    out['damage_efficiency_x_survivors'] = g('ko_efficiency_diff', 0) * g('survivor_diff_30', 0)
-    out['burst_damage_x_critical'] = g('max_hit_diff', 0) * g('critical_alive_diff', 0)
-    out['early_damage_x_status'] = g('early_damage_diff', 0) * g('status_diff_highvalue', 0)
-    out['late_damage_x_control'] = g('late_damage_diff', 0) * g('turns_disabled_diff', 0)
-    out['ohko_x_momentum'] = g('ohko_diff', 0) * g('hp_momentum_diff', 0)
-    out['damage_consistency_x_walls'] = g('damage_consistency_diff', 0) * g('walls_diff', 0)
-    
+
     return pd.Series(out, dtype='float64')
 
 
@@ -1488,15 +1291,12 @@ def extract_all_features(df):
     # Boost features
     boost_features = df.apply(make_boost_features, axis=1)
     
-    # Damage features
-    damage_features = df.apply(make_damage_features, axis=1)
     
     # Combine all features
     all_features = pd.concat([
         status_features, endgame_features, role_features, status_t30_features,
         hp_dist_features, move_quality_features, static_features,
         momentum_features, critical_features, early_features, boost_features,
-        damage_features
     ], axis=1)
     
     # Interaction features (need all other features first)
@@ -1520,7 +1320,6 @@ def extract_all_features(df):
     print(f"  - Critical pokemon features: {len(critical_features.columns)}")
     print(f"  - Early game features: {len(early_features.columns)}")
     print(f"  - Boost features: {len(boost_features.columns)}")
-    print(f"  - Damage features: {len(damage_features.columns)}")
     print(f"  - Interaction features: {len(interaction_features.columns)}")
     
     return all_features
