@@ -5,7 +5,7 @@ Domain-specific constants for Gen 1 OU competitive Pokemon battles.
 """
 
 from pathlib import Path
-
+import os
 # ==============================================================================
 # DATA CONFIGURATION
 # ==============================================================================
