@@ -14,22 +14,18 @@ from constants import *
 # ==============================================================================
 
 def load_data():
-    """
-    Load training and test datasets from JSONL files.
-    
-    Returns:
-        tuple: (train_df, test_df) DataFrames
-    """
-    train_df = pd.read_json(DATA_PATH / "train.jsonl", lines=True)
-    test_df = pd.read_json(DATA_PATH / "test.jsonl", lines=True)
-    
-    print(f"✓ Train: {train_df.shape[0]} battles")
-    print(f"✓ Test: {test_df.shape[0]} battles")
-    
+    train_df = pd.read_json(os.path.join(DATA_PATH, "train.jsonl"), lines=True)
+    test_df  = pd.read_json(os.path.join(DATA_PATH, "test.jsonl"),  lines=True)
+
+    print(f" Train: {train_df.shape[0]} battles")
+    print(f" Test:  {test_df.shape[0]} battles")
+
     assert COL_TARGET in train_df.columns, "Target missing!"
     assert COL_TARGET not in test_df.columns, "Target leakage!"
-    
+
     return train_df, test_df
+
+train_df, test_df = load_data(
 
 
 # ==============================================================================
