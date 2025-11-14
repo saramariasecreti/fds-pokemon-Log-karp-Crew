@@ -2,7 +2,7 @@
 
 Machine learning models for predicting outcomes of competitive Pokemon battles using feature engineering and ensemble methods.
 
-## 🎯 Project Overview
+##  Project Overview
 
 This project analyzes Pokemon battle timelines from the first turns to predict match outcomes with high accuracy. It extracts 150+ strategic features covering damage patterns, status warfare, role composition, move quality, and complex interactions.
 
@@ -14,7 +14,7 @@ This project analyzes Pokemon battle timelines from the first turns to predict m
 - **Ensemble Methods**: LogisticRegression + XGBoost ensemble
 - **Chess-Like Position Evaluation**: Detects errors and blunders in gameplay
 
-## 📊 Feature Categories
+##  Feature Categories
 
 | Category | Count | 
 |----------|-------|
@@ -30,22 +30,7 @@ This project analyzes Pokemon battle timelines from the first turns to predict m
 | Boost Features | Stat boost accumulation tracking |
 | Interactions | Multiplicative feature interactions |
 
-## 🗂️ Repository Structure
-
-```
-pokemon-battle-predictor/
-├── libraries.py                 # Centralized imports
-├── constants.py                 # Domain constants and configurations
-├── functions.py                 # Feature engineering functions (154+ features)
-├── feature_selection.py         # Feature selection pipeline with GridSearch
-├── hyperparameter_tuning.py     # GridSearch hyperparameter optimization
-├── ensemble_optimization.py     # Advanced CV, ensemble blending, stacking
-├── feature_importance.py        # Feature importance analysis & visualization
-├── main.py                      # Main execution pipeline (14 steps)
-├── requirements.txt             # Python dependencies
-├── LICENSE                      # MIT License
-├── README.md                    # This file
-```
+`
 
 ### Usage
 
@@ -65,7 +50,7 @@ The pipeline will:
 13. Generate multiple submission files
 14. Create detailed summary report
 
-## 🔬 Feature Engineering Details
+##  Feature Engineering Details
 
 ### Status Features
 Tracks status condition applications (Sleep, Freeze, Paralysis, Burn) with emphasis on:
@@ -93,7 +78,7 @@ Multiplicative interactions capturing non-linear relationships:
 - Boost × Survivors (setup sweeper success)
 - Damage × Control (status synergies)
 
-## 📈 Model Performance
+##  Model Performance
 ## Ensemble Methods
 
 The pipeline implements **three ensemble strategies**:
@@ -126,7 +111,7 @@ The pipeline implements **three ensemble strategies**:
 - learning_rate: 0.03
 - Features: ~60-80 (after selection)
 
-## 🎓 Technical Highlights
+##  Technical Highlights
 
 ### Feature Selection Pipeline
 
