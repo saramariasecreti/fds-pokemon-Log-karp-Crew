@@ -6,8 +6,8 @@ GridSearch optimization for LogisticRegression and XGBoost models.
 
 import numpy as np
 import pandas as pd
-from libraries import *
-from constants import *
+from src.libraries import *
+from src.constants import *
 
 
 def optimize_logistic_regression(X_train, y_train, cv_folds=10):
