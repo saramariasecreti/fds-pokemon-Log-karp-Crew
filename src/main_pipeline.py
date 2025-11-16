@@ -130,12 +130,43 @@ def main():
     oof_xgb = cv_results['oof_xgb']
     test_pred_log = cv_results['test_pred_log']
     test_pred_xgb = cv_results['test_pred_xgb']
-    
+
     # =========================================================================
-    # STEP 8: ENSEMBLE WEIGHT OPTIMIZATION
+    # STEP 8: TRAIN FINAL MODELS FOR FEATURE IMPORTANCE
     # =========================================================================
     print("\n" + "="*70)
-    print("STEP 8: ENSEMBLE WEIGHT OPTIMIZATION")
+    print("STEP 8: TRAINING FINAL MODELS")
+    print("="*70)
+    
+    print("\n✓ Training final Logistic Regression...")
+    clean_log_params = {k.replace('clf__', ''): v for k, v in log_best_params.items()}
+    log_final = Pipeline([
+        ('scaler', StandardScaler()),
+        ('clf', LogisticRegression(**clean_log_params, random_state=SEED, 
+                                  max_iter=5000, solver='saga'))
+    ])
+    log_final.fit(X_train_log, y_train)
+    
+    print("✓ Training final XGBoost...")
+    xgb_final = XGBClassifier(**xgb_best_params, random_state=SEED, eval_metric='logloss')
+    xgb_final.fit(X_train_xgb, y_train)
+    
+    # =========================================================================
+    # STEP 9: FEATURE IMPORTANCE ANALYSIS
+    # =========================================================================
+    print("\n" + "="*70)
+    print("STEP 9: FEATURE IMPORTANCE ANALYSIS")
+    print("="*70)
+    
+    importance_results = perform_feature_importance_analysis(
+        log_final, xgb_final, log_features, xgb_features, top_n=20
+    )
+    
+    # =========================================================================
+    # STEP 10: ENSEMBLE WEIGHT OPTIMIZATION
+    # =========================================================================
+    print("\n" + "="*70)
+    print("STEP 10: ENSEMBLE WEIGHT OPTIMIZATION")
     print("="*70)
     
     best_alpha, best_score, blend_results = optimize_ensemble_weights(
@@ -146,10 +177,10 @@ def main():
     test_pred_blend = best_alpha * test_pred_log + (1 - best_alpha) * test_pred_xgb
     
     # =========================================================================
-    # STEP 9: STACKING ENSEMBLE
+    # STEP 11: STACKING ENSEMBLE
     # =========================================================================
     print("\n" + "="*70)
-    print("STEP 9: STACKING ENSEMBLE")
+    print("STEP 11: STACKING ENSEMBLE")
     print("="*70)
     
     meta_model, meta_pred_train, test_pred_stack = create_stacking_ensemble(
@@ -170,10 +201,10 @@ def main():
         print("\n✓ Using WEIGHTED AVERAGE for final submission")
     
     # =========================================================================
-    # STEP 10: LEARNING CURVES & OVERFITTING ANALYSIS
+    # STEP 12: LEARNING CURVES & OVERFITTING ANALYSIS
     # =========================================================================
     print("\n" + "="*70)
-    print("STEP 10: LEARNING CURVES & OVERFITTING ANALYSIS")
+    print("STEP 12: LEARNING CURVES & OVERFITTING ANALYSIS")
     print("="*70)
     
     overfitting_analysis = analyze_overfitting(
@@ -181,36 +212,7 @@ def main():
         log_best_params, xgb_best_params
     )
     
-    # =========================================================================
-    # STEP 11: TRAIN FINAL MODELS FOR FEATURE IMPORTANCE
-    # =========================================================================
-    print("\n" + "="*70)
-    print("STEP 11: TRAINING FINAL MODELS")
-    print("="*70)
-    
-    print("\n✓ Training final Logistic Regression...")
-    clean_log_params = {k.replace('clf__', ''): v for k, v in log_best_params.items()}
-    log_final = Pipeline([
-        ('scaler', StandardScaler()),
-        ('clf', LogisticRegression(**clean_log_params, random_state=SEED, 
-                                  max_iter=5000, solver='saga'))
-    ])
-    log_final.fit(X_train_log, y_train)
-    
-    print("✓ Training final XGBoost...")
-    xgb_final = XGBClassifier(**xgb_best_params, random_state=SEED, eval_metric='logloss')
-    xgb_final.fit(X_train_xgb, y_train)
-    
-    # =========================================================================
-    # STEP 12: FEATURE IMPORTANCE ANALYSIS
-    # =========================================================================
-    print("\n" + "="*70)
-    print("STEP 12: FEATURE IMPORTANCE ANALYSIS")
-    print("="*70)
-    
-    importance_results = perform_feature_importance_analysis(
-        log_final, xgb_final, log_features, xgb_features, top_n=20
-    )
+
     
     # =========================================================================
     # STEP 13: CREATE SUBMISSIONS
