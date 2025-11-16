@@ -6,8 +6,8 @@ Advanced feature selection with correlation pruning and GridSearch optimization.
 
 import numpy as np
 import pandas as pd
-from libraries import *
-from constants import *
+from src.libraries import *
+from src.constants import *
 
 
 def remove_high_correlation_features(X_train, y_train, base_feature_cols, threshold=0.9):
