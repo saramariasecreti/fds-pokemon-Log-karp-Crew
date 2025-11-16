@@ -7,8 +7,8 @@ Advanced cross-validation, ensemble blending, and stacking.
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from libraries import *
-from constants import *
+from src.libraries import *
+from src.constants import *
 
 
 def cross_validate_models(X_train_log, y_train, X_train_xgb, X_test_log, X_test_xgb, 
@@ -433,7 +433,7 @@ def create_submissions(test_df, test_pred_log, test_pred_xgb, test_pred_blend, t
     print("CREATING SUBMISSIONS")
     print("="*70)
     
-    from constants import COL_ID, COL_TARGET
+    from src.constants import COL_ID, COL_TARGET
     
     # LogReg submission
     submission_log = pd.DataFrame({
