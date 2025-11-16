@@ -8,8 +8,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from libraries import *
-from constants import *
+from src.libraries import *
+from src.constants import *
 
 
 def analyze_logreg_importance(model, feature_names, top_n=20):
