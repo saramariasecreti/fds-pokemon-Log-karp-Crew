@@ -14,6 +14,8 @@ from src.ensemble_optimization import (
     cross_validate_models, optimize_ensemble_weights, create_stacking_ensemble,
     compare_ensemble_methods, analyze_overfitting, create_submissions
 )
+from src.submissons import create_submissions
+
 
 
 def main():
@@ -218,18 +220,15 @@ def main():
     print("="*70)
     
     create_submissions(
-        test_df, test_pred_log, test_pred_xgb, 
-        test_pred_blend, test_pred_stack
+        test_df=test_df,
+        COL_ID=COL_ID,
+        COL_TARGET=COL_TARGET,
+        test_pred_log=test_pred_log,
+        test_pred_weighted=test_pred_blend,
+        test_pred_stack=test_pred_stack
     )
-    
-    # Create main submission file (best method)
-    submission = pd.DataFrame({
-        COL_ID: test_df[COL_ID],
-        COL_TARGET: (final_test_pred >= 0.5).astype(int)
-    })
-    submission.to_csv('submission.csv', index=False)
-    print(f"\n✓ submission.csv (FINAL - {best_method.upper()})")
-    print(f"  - Win rate: {submission[COL_TARGET].mean():.3f}")
+
+    print('3 submissons created')
     
     # =========================================================================
     # STEP 14: SUMMARY REPORT
@@ -271,9 +270,7 @@ def main():
     
     print(f"\n✓ Output Files Generated:")
     output_files = [
-        "submission.csv (FINAL)",
         "submission_logistic.csv",
-        "submission_xgboost.csv",
         "submission_weighted_ensemble.csv",
         "submission_stacking.csv",
         "high_correlation_report.csv",
@@ -310,7 +307,6 @@ def main():
         'xgb_features': xgb_features,
         'best_method': best_method,
         'best_alpha': best_alpha,
-        'submission': submission,
         'cv_results': cv_results,
         'importance_results': importance_results,
         'overfitting_analysis': overfitting_analysis
