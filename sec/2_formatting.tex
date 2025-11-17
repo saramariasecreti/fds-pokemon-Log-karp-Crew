@@ -2,7 +2,7 @@
 
 We developed a structured set of features combining static Pokémon attributes and dynamic battle information. Static features include base stats, typing and indicators for meta-relevant Pokémon known to affect win rates. Status conditions were assigned different weights based on their competitive impact, and HP distribution was used as a measure of team resilience.
 
-The most influential information came from a turn-30 snapshot capturing the battle state: remaining Pokémon, cumulative KOs, HP percentages and presence of strong meta staples. We introduced additional experimental features, as well as interaction terms such as HP $\times$ KOs and HP $\times$ survivors, which improved the performance of linear models. Conversely, a ``bad moves'', chees-like feature, proved less informative than expected.
+The most influential information came from a turn-30 snapshot capturing the battle state: remaining Pokémon, cumulative KOs, HP percentages and presence of strong meta staples. We introduced additional experimental features, as well as interaction terms such as HP $\times$ KOs and HP $\times$ survivors, which improved the performance of linear models. Conversely, a ``bad moves'', chess-like feature, proved less informative than expected.
 
 \section{Feature Selection and Models}
 
@@ -10,4 +10,5 @@ Highly correlated variables were pruned ($>$0.9) to increase model stability. Lo
 
 \section{Ensemble Strategies and Submissions}
 
-We evaluated two ensemble approaches: a weighted average between Logistic Regression and XGBoost, and a stacking meta-learner. The weighted ensemble provided strong internal stability, while stacking achieved the highest public leaderboard score. Three final submission files were generated: Logistic Regression (solid baseline), weighted ensemble and stacking model.
+We evaluated two ensemble approaches: a weighted average between Logistic Regression and XGBoost, and a stacking meta-learner. The weighted ensemble provided strong internal stability, while stacking achieved the highest public leaderboard score. The individual models consistently achieved an accuracy of approximately 84.7% in local. The ensemble methods resulted in a measurable, though modest, improvement, with the best configuration reaching a maximum accuracy of 85.05%. Three final submission files were generated: Logistic Regression (solid baseline), weighted ensemble and stacking model.
+
